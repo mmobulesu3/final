@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Tutor - Dashboard</title>
+ <style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 10px;
+    background: linear-gradient(to right, #1098c6, #9ddc0b);
+    color: #333;
+  }
+
+  h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+    color: #444;
+  }
+
+  /* Chat History */
+  #chat-history {
+    background: white;
+    padding: 15px;
+    min-height: 300px;
+    max-height: 450px;
+    overflow-y: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    border: none;
+  }
+
+  /* Chat Bubbles */
+  .chat-question, .chat-ai-answer, .chat-user {
+    margin: 10px 0;
+    padding: 12px 16px;
+    border-radius: 10px;
+    line-height: 1.5;
+    animation: fadeIn 0.3s ease;
+  }
+  .chat-question {
+    background: linear-gradient(135deg,#90caf9,#42a5f5);
+    color: #fff;
+    font-weight: 600;
+    border-left: 6px solid #0d47a1;
+  }
+  .chat-ai-answer {
+    background: linear-gradient(135deg, #eeeeee, #f5f5f5);
+    font-style: italic;
+    color: #333;
+    border-left: 6px solid #888;
+  }
+  .chat-user {
+    background: linear-gradient(135deg,#a5d6a7,#66bb6a);
+    color: #fff;
+    border-left: 6px solid #1b5e20;
+  }
+
+  /* Input + Button Row */
+  .answer-section {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  #user-answer {
+    flex-grow: 1;
+    padding: 10px 14px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    transition: border 0.3s ease, box-shadow 0.3s ease;
+  }
+  #user-answer:focus {
+    outline: none;
+    border-color: #42a5f5;
+    box-shadow: 0 0 6px rgba(66,165,245,0.6);
+  }
+
+  /* Buttons */
+  button {
+    padding: 10px 18px;
+    font-size: 1rem;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(135deg, #2196F3, #42a5f5);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: all 0.25s ease;
+  }
+  button:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.03);
+    background: linear-gradient(135deg, #1976d2, #42a5f5);
+  }
+  button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  /* Record Button Colors */
+  #record-btn {
+    background: linear-gradient(135deg, #e53935, #ef5350);
+  }
+  #record-btn.recording {
+    background: linear-gradient(135deg, #43a047, #66bb6a);
+  }
+
+  /* Video Preview */
+  #preview {
+    margin-top: 20px;
+    width: 320px;
+    height: 240px;
+    border-radius: 10px;
+    background: black;
+    object-fit: cover;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  #recorded-video-container {
+    margin-top: 15px;
+    max-width: 320px;
+  }
+  #recorded-video-container video {
+    width: 100%;
+    border-radius: 10px;
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  /* Domain Selection */
+  #domain-selection {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    align-items: center;
+  }
+  #domain-selection select {
+    padding: 8px 12px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: linear-gradient(135deg, #ffffff, #f7f7f7);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  #domain-selection select:hover {
+    border-color: #66bb6a;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    from {opacity: 0; transform: translateY(5px);}
+    to {opacity: 1; transform: translateY(0);}
+  }
+</style>
+
+</head>
+<body>
+  <h1> 🌟🌟AI Tutor - Practice🌟🌟</h1>
+
+  <div id="domain-selection">
+    <label for="subject">Choose Domain:</label>
+    <select id="subject">
+      <option value="java">Java Full-Stack Developer</option>
+      <option value="dataEngineering">Data Engineering</option>
+      <option value="dataScience">Data Science</option>
+      <option value="sfdc">SFDC Developer</option>
+    </select>
+    <button id="start-btn">Start Practice</button>
+  </div>
+
+  <div id="chat-history">
+    <div style="text-align:center; color:#666;">
+      Select a domain and click <strong>Start Practice</strong> to begin.
+    </div>
+  </div>
+
+  <div class="answer-section">
+    <input
+      type="text"
+      id="user-answer"
+      placeholder="Type your answer here..."
+      autocomplete="off"
+      disabled
+    />
+    <button id="submit-btn" disabled>Submit Answer</button>
+    <button id="record-btn" disabled>🎤 Speak</button>
+  </div>
+
+  <video id="preview" autoplay muted></video>
+
+  <div id="recorded-video-container"></div>
+
+  <script>
+    const questions = {
+      java: [
+        {
+          question: "Q1.Introduce yourself ?",
+          answers: [
+            "Hello! I'm [Your Name], a seasoned Java full-stack developer with eight years of hands-on experience in crafting robust and scalable applications. Throughout my career, I've been deeply involved in the end-to-end development process, from conceptualization and architecture design to implementation and deployment.\n\n1) My journey began with a passion for coding and problem-solving, leading me to specialize in Java and its vast ecosystem of frameworks and tools. I have a strong command of front-end technologies like HTML, CSS, and JavaScript coupled with frameworks such as Angular or React, enabling me to create intuitive and user-friendly interfaces.\n2) On the backend side, I thrive in utilizing Java frameworks like Spring and Hibernate to build efficient and secure server-side applications. I'm adept at database management, leveraging technologies such as MySQL or MongoDB to ensure optimal data handling and storage.\n3) My experience extends beyond just coding; I've collaborated closely with cross-functional teams, including UX/UI designers, QA engineers, and product managers, to deliver high-quality solutions that meet both user needs and business objectives.\n4) Constantly staying updated with the latest trends and advancements in the Java ecosystem is something I prioritize, allowing me to incorporate innovative techniques and best practices into my work.\n5) I'm enthusiastic about tackling new challenges, solving complex problems, and contributing my expertise to create impactful software solutions."
+          ],
+        },
+        {
+          question: "Q2.Tell me about your project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: [
+            "Interfaces allow multiple inheritance; abstract classes can have constructors",
+          ],
+        },
+        {
+          question: "Q3.Tell me about your second project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: ["It allows beans to be injected via constructors, setters or fields"],
+        },
+        {
+          question: "Q4.What are your roles and responsibilities / daily routines in current project? ",
+          answers: [
+            "REST is stateless and uses JSON; SOAP uses XML with strict standards",
+          ],
+        },
+        {
+          question: "Q5.Scenario 2: what are the challenges you have faced and how you resolved them?",
+          answers: [
+            "Microservices are small services; use OAuth2, JWT, and gateway patterns for security",
+          ],
+        },
+        {
+          question: "Q6.Explain the concept of Inversion of Control (IoC) and Dependency Injection (DI)?",
+          answers: [
+            "Hello! I'm [Your Name], a seasoned Java full-stack developer with eight years of hands-on experience in crafting robust and scalable applications. Throughout my career, I've been deeply involved in the end-to-end development process, from conceptualization and architecture design to implementation and deployment.\n\n1) My journey began with a passion for coding and problem-solving, leading me to specialize in Java and its vast ecosystem of frameworks and tools. I have a strong command of front-end technologies like HTML, CSS, and JavaScript coupled with frameworks such as Angular or React, enabling me to create intuitive and user-friendly interfaces.\n2) On the backend side, I thrive in utilizing Java frameworks like Spring and Hibernate to build efficient and secure server-side applications. I'm adept at database management, leveraging technologies such as MySQL or MongoDB to ensure optimal data handling and storage.\n3) My experience extends beyond just coding; I've collaborated closely with cross-functional teams, including UX/UI designers, QA engineers, and product managers, to deliver high-quality solutions that meet both user needs and business objectives.\n4) Constantly staying updated with the latest trends and advancements in the Java ecosystem is something I prioritize, allowing me to incorporate innovative techniques and best practices into my work.\n5) I'm enthusiastic about tackling new challenges, solving complex problems, and contributing my expertise to create impactful software solutions."
+          ],
+        },
+        {
+          question: "Q7.what are the differences between REST and SOAP?",
+          answers: [
+            "Interfaces allow multiple inheritance; abstract classes can have constructors",
+          ],
+        },
+        {
+          question: "8.Describe your experience with front-end technologies in a Java full stack environment?",
+          answers: ["It allows beans to be injected via constructors, setters or fields"],
+        },
+        {
+          question: "Q9.Can you explain the spring framework and its core modules?",
+          answers: [
+            "REST is stateless and uses JSON; SOAP uses XML with strict standards",
+          ],
+        },
+        {
+          question: "Q10.Describe the differences between CSS Grid and Flexbox for layout design.",
+          answers: [
+            "Microservices are small services; use OAuth2, JWT, and gateway patterns for security",
+          ],
+        },
+        {
+          question: "Q1.Introduce yourself ?",
+          answers: [
+            "Hello! I'm [Your blem-solving, leading me to specialize in Java and its vast ecosystem of frameworks and tools. I have a strong command of front-end technologies like HTML, CSS, and JavaScript coupled with frameworks such as Angular or React, enabling me to create intuitive and user-friendly interfaces.\n2) On the backend side, I thrive in utilizing Java frameworks like Spring and Hibernate to build efficient and secure server-side applications. I'm adept at database management, leveraging technologies such as MySQL or MongoDB to ensure optimal data handling and storage.\n3) My experience extends beyond just coding; I've collaborated closely with cross-functional teams, including UX/UI designers, QA engineers, and product managers, to deliver high-quality solutions that meet both user needs and business objectives.\n4) Constantly staying updated with the latest trends and advancements in the Java ecosystem is something I prioritize, allowing me to incorporate innovative techniques and best practices into my work.\n5) I'm enthusiastic about tackling new challenges, solving complex problems, and contributing my expertise to create impactful software solutions."
+          ],
+        },
+        {
+          question: "Q2.Tell me about your project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: [
+            "Interfaces allow multiple inheritance; abstract classes can have constructors",
+          ],
+        },
+        {
+          question: "Q3.Tell me about your second project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: ["It allows beans to be injected via constructors, setters or fields"],
+        },
+        {
+          question: "What is the difference between REST and SOAP APIs?",
+          answers: [
+            "REST is stateless and uses JSON; SOAP uses XML with strict standards",
+          ],
+        },
+        {
+          question: "What are Microservices and how do you secure them?",
+          answers: [
+            "Microservices are small services; use OAuth2, JWT, and gateway patterns for security",
+          ],
+        },
+        {
+          question: "Q1.Introduce yourself ?",
+          answers: [
+            "Hello! I'm [Your Name], a seasoned Java full-stack developer with eight years of hands-on experience in crafting robust and scalable applications. Throughout my career, I've been deeply involved in the end-to-end development process, from conceptualization and architecture design to implementation and deployment.\n\n1) My journey began with a passion for coding and problem-solving, leading me to specialize in Java and its vast ecosystem of frameworks and tools. I have a strong command of front-end technologies like HTML, CSS, and JavaScript coupled with frameworks such as Angular or React, enabling me to create intuitive and user-friendly interfaces.\n2) On the backend side, I thrive in utilizing Java frameworks like Spring and Hibernate to build efficient and secure server-side applications. I'm adept at database management, leveraging technologies such as MySQL or MongoDB to ensure optimal data handling and storage.\n3) My experience extends beyond just coding; I've collaborated closely with cross-functional teams, including UX/UI designers, QA engineers, and product managers, to deliver high-quality solutions that meet both user needs and business objectives.\n4) Constantly staying updated with the latest trends and advancements in the Java ecosystem is something I prioritize, allowing me to incorporate innovative techniques and best practices into my work.\n5) I'm enthusiastic about tackling new challenges, solving complex problems, and contributing my expertise to create impactful software solutions."
+          ],
+        },
+        {
+          question: "Q2.Tell me about your project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: [
+            "Interfaces allow multiple inheritance; abstract classes can have constructors",
+          ],
+        },
+        {
+          question: "Q3.Tell me about your second project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: ["It allows beans to be injected via constructors, setters or fields"],
+        },
+        {
+          question: "What is the difference between REST and SOAP APIs?",
+          answers: [
+            "REST is stateless and uses JSON; SOAP uses XML with strict standards",
+          ],
+        },
+        {
+          question: "What are Microservices and how do you secure them?",
+          answers: [
+            "Microservices are small services; use OAuth2, JWT, and gateway patterns for security",
+          ],
+        },
+        {
+          question: "Q1.Introduce yourself ?",
+          answers: [
+            "Hello! I'm [Your Name], a seasoned Java full-stack developer with eight years of hands-on experience in crafting robust and scalable applications. Throughout my career, I've been deeply involved in the end-to-end development process, from conceptualization and architecture design to implementation and deployment.\n\n1) My journey began with a passion for coding and problem-solving, leading me to specialize in Java and its vast ecosystem of frameworks and tools. I have a strong command of front-end technologies like HTML, CSS, and JavaScript coupled with frameworks such as Angular or React, enabling me to create intuitive and user-friendly interfaces.\n2) On the backend side, I thrive in utilizing Java frameworks like Spring and Hibernate to build efficient and secure server-side applications. I'm adept at database management, leveraging technologies such as MySQL or MongoDB to ensure optimal data handling and storage.\n3) My experience extends beyond just coding; I've collaborated closely with cross-functional teams, including UX/UI designers, QA engineers, and product managers, to deliver high-quality solutions that meet both user needs and business objectives.\n4) Constantly staying updated with the latest trends and advancements in the Java ecosystem is something I prioritize, allowing me to incorporate innovative techniques and best practices into my work.\n5) I'm enthusiastic about tackling new challenges, solving complex problems, and contributing my expertise to create impactful software solutions."
+          ],
+        },
+        {
+          question: "Q2.Tell me about your project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: [
+            "Interfaces allow multiple inheritance; abstract classes can have constructors",
+          ],
+        },
+        {
+          question: "Q3.Tell me about your second project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: ["It allows beans to be injected via constructors, setters or fields"],
+        },
+        {
+          question: "What is the difference between REST and SOAP APIs?",
+          answers: [
+            "REST is stateless and uses JSON; SOAP uses XML with strict standards",
+          ],
+        },
+        {
+          question: "What are Microservices and how do you secure them?",
+          answers: [
+            "Microservices are small services; use OAuth2, JWT, and gateway patterns for security",
+          ],
+        },
+        {
+          question: "Q1.Introduce yourself ?",
+          answers: [
+            "Hello! I'm [Your Name], a seasoned Java full-stack developer with eight years of hands-on experience in crafting robust and scalable applications. Throughout my career, I've been deeply involved in the end-to-end development process, from conceptualization and architecture design to implementation and deployment.\n\n1) My journey began with a passion for coding and problem-solving, leading me to specialize in Java and its vast ecosystem of frameworks and tools. I have a strong command of front-end technologies like HTML, CSS, and JavaScript coupled with frameworks such as Angular or React, enabling me to create intuitive and user-friendly interfaces.\n2) On the backend side, I thrive in utilizing Java frameworks like Spring and Hibernate to build efficient and secure server-side applications. I'm adept at database management, leveraging technologies such as MySQL or MongoDB to ensure optimal data handling and storage.\n3) My experience extends beyond just coding; I've collaborated closely with cross-functional teams, including UX/UI designers, QA engineers, and product managers, to deliver high-quality solutions that meet both user needs and business objectives.\n4) Constantly staying updated with the latest trends and advancements in the Java ecosystem is something I prioritize, allowing me to incorporate innovative techniques and best practices into my work.\n5) I'm enthusiastic about tackling new challenges, solving complex problems, and contributing my expertise to create impactful software solutions."
+          ],
+        },
+        {
+          question: "Q2.Tell me about your project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: [
+            "Interfaces allow multiple inheritance; abstract classes can have constructors",
+          ],
+        },
+        {
+          question: "Q3.Tell me about your second project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: ["It allows beans to be injected via constructors, setters or fields"],
+        },
+        {
+          question: "What is the difference between REST and SOAP APIs?",
+          answers: [
+            "REST is stateless and uses JSON; SOAP uses XML with strict standards",
+          ],
+        },
+        {
+          question: "What are Microservices and how do you secure them?",
+          answers: [
+            "Microservices are small services; use OAuth2, JWT, and gateway patterns for security",
+          ],
+        },
+        {
+          question: "Q1.Introduce yourself ?",
+          answers: [
+            "Hello! I'm [Your Name], a seasoned Java full-stack developer with eight years of hands-on experience in crafting robust and scalable applications. Throughout my career, I've been deeply involved in the end-to-end development process, from conceptualization and architecture design to implementation and deployment.\n\n1) My journey began with a passion for coding and problem-solving, leading me to specialize in Java and its vast ecosystem of frameworks and tools. I have a strong command of front-end technologies like HTML, CSS, and JavaScript coupled with frameworks such as Angular or React, enabling me to create intuitive and user-friendly interfaces.\n2) On the backend side, I thrive in utilizing Java frameworks like Spring and Hibernate to build efficient and secure server-side applications. I'm adept at database management, leveraging technologies such as MySQL or MongoDB to ensure optimal data handling and storage.\n3) My experience extends beyond just coding; I've collaborated closely with cross-functional teams, including UX/UI designers, QA engineers, and product managers, to deliver high-quality solutions that meet both user needs and business objectives.\n4) Constantly staying updated with the latest trends and advancements in the Java ecosystem is something I prioritize, allowing me to incorporate innovative techniques and best practices into my work.\n5) I'm enthusiastic about tackling new challenges, solving complex problems, and contributing my expertise to create impactful software solutions."
+          ],
+        },
+        {
+          question: "Q2.Tell me about your project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: [
+            "Interfaces allow multiple inheritance; abstract classes can have constructors",
+          ],
+        },
+        {
+          question: "Q3.Tell me about your second project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: ["It allows beans to be injected via constructors, setters or fields"],
+        },
+        {
+          question: "What is the difference between REST and SOAP APIs?",
+          answers: [
+            "REST is stateless and uses JSON; SOAP uses XML with strict standards",
+          ],
+        },
+        {
+          question: "What are Microservices and how do you secure them?",
+          answers: [
+            "Microservices are small services; use OAuth2, JWT, and gateway patterns for security",
+          ],
+        },
+        {
+          question: "Q1.Introduce yourself ?",
+          answers: [
+            "Hello! I'm [Your Name], a seasoned Java full-stack developer with eight years of hands-on experience in crafting robust and scalable applications. Throughout my career, I've been deeply involved in the end-to-end development process, from conceptualization and architecture design to implementation and deployment.\n\n1) My journey began with a passion for coding and problem-solving, leading me to specialize in Java and its vast ecosystem of frameworks and tools. I have a strong command of front-end technologies like HTML, CSS, and JavaScript coupled with frameworks such as Angular or React, enabling me to create intuitive and user-friendly interfaces.\n2) On the backend side, I thrive in utilizing Java frameworks like Spring and Hibernate to build efficient and secure server-side applications. I'm adept at database management, leveraging technologies such as MySQL or MongoDB to ensure optimal data handling and storage.\n3) My experience extends beyond just coding; I've collaborated closely with cross-functional teams, including UX/UI designers, QA engineers, and product managers, to deliver high-quality solutions that meet both user needs and business objectives.\n4) Constantly staying updated with the latest trends and advancements in the Java ecosystem is something I prioritize, allowing me to incorporate innovative techniques and best practices into my work.\n5) I'm enthusiastic about tackling new challenges, solving complex problems, and contributing my expertise to create impactful software solutions."
+          ],
+        },
+        {
+          question: "Q2.Tell me about your project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: [
+            "Interfaces allow multiple inheritance; abstract classes can have constructors",
+          ],
+        },
+        {
+          question: "Q3.Tell me about your second project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: ["It allows beans to be injected via constructors, setters or fields"],
+        },
+        {
+          question: "What is the difference between REST and SOAP APIs?",
+          answers: [
+            "REST is stateless and uses JSON; SOAP uses XML with strict standards",
+          ],
+        },
+        {
+          question: "What are Microservices and how do you secure them?",
+          answers: [
+            "Microservices are small services; use OAuth2, JWT, and gateway patterns for security",
+          ],
+        },
+        {
+          question: "Q1.Introduce yourself ?",
+          answers: [
+            "Hello! I'm [Your Name], a seasoned Java full-stack developer with eight years of hands-on experience in crafting robust and scalable applications. Throughout my career, I've been deeply involved in the end-to-end development process, from conceptualization and architecture design to implementation and deployment.\n\n1) My journey began with a passion for coding and problem-solving, leading me to specialize in Java and its vast ecosystem of frameworks and tools. I have a strong command of front-end technologies like HTML, CSS, and JavaScript coupled with frameworks such as Angular or React, enabling me to create intuitive and user-friendly interfaces.\n2) On the backend side, I thrive in utilizing Java frameworks like Spring and Hibernate to build efficient and secure server-side applications. I'm adept at database management, leveraging technologies such as MySQL or MongoDB to ensure optimal data handling and storage.\n3) My experience extends beyond just coding; I've collaborated closely with cross-functional teams, including UX/UI designers, QA engineers, and product managers, to deliver high-quality solutions that meet both user needs and business objectives.\n4) Constantly staying updated with the latest trends and advancements in the Java ecosystem is something I prioritize, allowing me to incorporate innovative techniques and best practices into my work.\n5) I'm enthusiastic about tackling new challenges, solving complex problems, and contributing my expertise to create impactful software solutions."
+          ],
+        },
+        {
+          question: "Q2.Tell me about your project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: [
+            "Interfaces allow multiple inheritance; abstract classes can have constructors",
+          ],
+        },
+        {
+          question: "Q3.Tell me about your second project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: ["It allows beans to be injected via constructors, setters or fields"],
+        },
+        {
+          question: "What is the difference between REST and SOAP APIs?",
+          answers: [
+            "REST is stateless and uses JSON; SOAP uses XML with strict standards",
+          ],
+        },
+        {
+          question: "What are Microservices and how do you secure them?",
+          answers: [
+            "Microservices are small services; use OAuth2, JWT, and gateway patterns for security",
+          ],
+        },
+      ],
+      dataEngineering: [
+        {
+          question: "Introduce yourself as a senior data engineer.",
+          answers: [
+            "With 10+ years in data pipeline design, I specialize in Spark, Kafka, and cloud data platforms...",
+          ],
+        },
+        {
+          question: "What is ETL vs ELT?",
+          answers: ["ETL transforms before load; ELT loads then transforms"],
+        },
+        {
+          question: "What’s the use of Apache Kafka?",
+          answers: ["Distributed messaging system for real-time ingestion"],
+        },
+        {
+          question: "Explain Data Lake vs Data Warehouse.",
+          answers: ["Lakes store raw data; warehouses are structured for analytics"],
+        },
+        {
+          question: "How do you design scalable pipelines?",
+          answers: ["Use batch/stream split, fault tolerance, parallelism"],
+        },
+        {
+          question: "Q1.Introduce yourself ?",
+          answers: [
+            "Hello! I'm [Your Name], a seasoned Java full-stack developer with eight years of hands-on experience in crafting robust and scalable applications. Throughout my career, I've been deeply involved in the end-to-end development process, from conceptualization and architecture design to implementation and deployment.\n\n1) My journey began with a passion for coding and problem-solving, leading me to specialize in Java and its vast ecosystem of frameworks and tools. I have a strong command of front-end technologies like HTML, CSS, and JavaScript coupled with frameworks such as Angular or React, enabling me to create intuitive and user-friendly interfaces.\n2) On the backend side, I thrive in utilizing Java frameworks like Spring and Hibernate to build efficient and secure server-side applications. I'm adept at database management, leveraging technologies such as MySQL or MongoDB to ensure optimal data handling and storage.\n3) My experience extends beyond just coding; I've collaborated closely with cross-functional teams, including UX/UI designers, QA engineers, and product managers, to deliver high-quality solutions that meet both user needs and business objectives.\n4) Constantly staying updated with the latest trends and advancements in the Java ecosystem is something I prioritize, allowing me to incorporate innovative techniques and best practices into my work.\n5) I'm enthusiastic about tackling new challenges, solving complex problems, and contributing my expertise to create impactful software solutions."
+          ],
+        },
+        {
+          question: "Q2.Tell me about your project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: [
+            "Interfaces allow multiple inheritance; abstract classes can have constructors",
+          ],
+        },
+        {
+          question: "Q3.Tell me about your second project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: ["It allows beans to be injected via constructors, setters or fields"],
+        },
+        {
+          question: "What is the difference between REST and SOAP APIs?",
+          answers: [
+            "REST is stateless and uses JSON; SOAP uses XML with strict standards",
+          ],
+        },
+        {
+          question: "What are Microservices and how do you secure them?",
+          answers: [
+            "Microservices are small services; use OAuth2, JWT, and gateway patterns for security",
+          ],
+        },
+        {
+          question: "Q1.Introduce yourself ?",
+          answers: [
+            "Hello! I'm [Your Name], a seasoned Java full-stack developer with eight years of hands-on experience in crafting robust and scalable applications. Throughout my career, I've been deeply involved in the end-to-end development process, from conceptualization and architecture design to implementation and deployment.\n\n1) My journey began with a passion for coding and problem-solving, leading me to specialize in Java and its vast ecosystem of frameworks and tools. I have a strong command of front-end technologies like HTML, CSS, and JavaScript coupled with frameworks such as Angular or React, enabling me to create intuitive and user-friendly interfaces.\n2) On the backend side, I thrive in utilizing Java frameworks like Spring and Hibernate to build efficient and secure server-side applications. I'm adept at database management, leveraging technologies such as MySQL or MongoDB to ensure optimal data handling and storage.\n3) My experience extends beyond just coding; I've collaborated closely with cross-functional teams, including UX/UI designers, QA engineers, and product managers, to deliver high-quality solutions that meet both user needs and business objectives.\n4) Constantly staying updated with the latest trends and advancements in the Java ecosystem is something I prioritize, allowing me to incorporate innovative techniques and best practices into my work.\n5) I'm enthusiastic about tackling new challenges, solving complex problems, and contributing my expertise to create impactful software solutions."
+          ],
+        },
+        {
+          question: "Q2.Tell me about your project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: [
+            "Interfaces allow multiple inheritance; abstract classes can have constructors",
+          ],
+        },
+        {
+          question: "Q3.Tell me about your second project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: ["It allows beans to be injected via constructors, setters or fields"],
+        },
+        {
+          question: "What is the difference between REST and SOAP APIs?",
+          answers: [
+            "REST is stateless and uses JSON; SOAP uses XML with strict standards",
+          ],
+        },
+        {
+          question: "What are Microservices and how do you secure them?",
+          answers: [
+            "Microservices are small services; use OAuth2, JWT, and gateway patterns for security",
+          ],
+        },
+        {
+          question: "Q1.Introduce yourself ?",
+          answers: [
+            "Hello! I'm [Your Name], a seasoned Java full-stack developer with eight years of hands-on experience in crafting robust and scalable applications. Throughout my career, I've been deeply involved in the end-to-end development process, from conceptualization and architecture design to implementation and deployment.\n\n1) My journey began with a passion for coding and problem-solving, leading me to specialize in Java and its vast ecosystem of frameworks and tools. I have a strong command of front-end technologies like HTML, CSS, and JavaScript coupled with frameworks such as Angular or React, enabling me to create intuitive and user-friendly interfaces.\n2) On the backend side, I thrive in utilizing Java frameworks like Spring and Hibernate to build efficient and secure server-side applications. I'm adept at database management, leveraging technologies such as MySQL or MongoDB to ensure optimal data handling and storage.\n3) My experience extends beyond just coding; I've collaborated closely with cross-functional teams, including UX/UI designers, QA engineers, and product managers, to deliver high-quality solutions that meet both user needs and business objectives.\n4) Constantly staying updated with the latest trends and advancements in the Java ecosystem is something I prioritize, allowing me to incorporate innovative techniques and best practices into my work.\n5) I'm enthusiastic about tackling new challenges, solving complex problems, and contributing my expertise to create impactful software solutions."
+          ],
+        },
+        {
+          question: "Q2.Tell me about your project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: [
+            "Interfaces allow multiple inheritance; abstract classes can have constructors",
+          ],
+        },
+        {
+          question: "Q3.Tell me about your second project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: ["It allows beans to be injected via constructors, setters or fields"],
+        },
+        {
+          question: "What is the difference between REST and SOAP APIs?",
+          answers: [
+            "REST is stateless and uses JSON; SOAP uses XML with strict standards",
+          ],
+        },
+        {
+          question: "What are Microservices and how do you secure them?",
+          answers: [
+            "Microservices are small services; use OAuth2, JWT, and gateway patterns for security",
+          ],
+        },
+        {
+          question: "Q1.Introduce yourself ?",
+          answers: [
+            "Hello! I'm [Your Name], a seasoned Java full-stack developer with eight years of hands-on experience in crafting robust and scalable applications. Throughout my career, I've been deeply involved in the end-to-end development process, from conceptualization and architecture design to implementation and deployment.\n\n1) My journey began with a passion for coding and problem-solving, leading me to specialize in Java and its vast ecosystem of frameworks and tools. I have a strong command of front-end technologies like HTML, CSS, and JavaScript coupled with frameworks such as Angular or React, enabling me to create intuitive and user-friendly interfaces.\n2) On the backend side, I thrive in utilizing Java frameworks like Spring and Hibernate to build efficient and secure server-side applications. I'm adept at database management, leveraging technologies such as MySQL or MongoDB to ensure optimal data handling and storage.\n3) My experience extends beyond just coding; I've collaborated closely with cross-functional teams, including UX/UI designers, QA engineers, and product managers, to deliver high-quality solutions that meet both user needs and business objectives.\n4) Constantly staying updated with the latest trends and advancements in the Java ecosystem is something I prioritize, allowing me to incorporate innovative techniques and best practices into my work.\n5) I'm enthusiastic about tackling new challenges, solving complex problems, and contributing my expertise to create impactful software solutions."
+          ],
+        },
+        {
+          question: "Q2.Tell me about your project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: [
+            "Interfaces allow multiple inheritance; abstract classes can have constructors",
+          ],
+        },
+        {
+          question: "Q3.Tell me about your second project / client (SPECIFIC TO EACH CANDIDATE RESUME)?",
+          answers: ["It allows beans to be injected via constructors, setters or fields"],
+        },
+        {
+          question: "What is the difference between REST and SOAP APIs?",
+          answers: [
+            "REST is stateless and uses JSON; SOAP uses XML with strict standards",
+          ],
+        },
+        {
+          question: "What are Microservices and how do you secure them?",
+          answers: [
+            "Microservices are small services; use OAuth2, JWT, and gateway patterns for security",
+          ],
+        },
+      ],
+      dataScience: [
+        {
+          question: "Introduce yourself as a data scientist.",
+          answers: ["With 10+ years experience in ML, NLP, and statistical modeling..."],
+        },
+        {
+          question: "What is overfitting and how to prevent it?",
+          answers: ["High variance; use regularization, cross-validation"],
+        },
+        {
+          question: "How do you evaluate classification models?",
+          answers: ["Use F1 score, precision, recall, ROC-AUC"],
+        },
+        {
+          question: "Explain the p-value in statistics.",
+          answers: ["Probability of seeing results given null hypothesis"],
+        },
+        {
+          question: "What is PCA?",
+          answers: ["Dimensionality reduction technique using eigenvectors"],
+        },
+        // Add more to reach 30 questions
+      ],
+      sfdc: [
+        {
+          question: "Introduce yourself as a Salesforce Developer.",
+          answers: [
+            "Over 10 years of customizing Salesforce using Apex, LWC, and complex workflows...",
+          ],
+        },
+        {
+          question: "Difference between Trigger and Process Builder?",
+          answers: ["Triggers are code; Process Builder is declarative"],
+        },
+        {
+          question: "How do you handle large data volume?",
+          answers: ["Use Bulk API, batch Apex, selective queries"],
+        },
+        {
+          question: "What is Governor Limits in Salesforce?",
+          answers: ["Resource limits to ensure multi-tenant safety"],
+        },
+        {
+          question: "How do you write test classes in Apex?",
+          answers: ["@isTest, assertEquals, and 75%+ coverage"],
+        },
+        // Add more to reach 30 questions
+      ],
+    };
+
+    let selectedSubject = "java";
+    let currentIndex = 0;
+    let currentQuestion = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let stream = null;
+    let isRecording = false;
+    let recognition = null;
+
+    const chatHistory = document.getElementById("chat-history");
+    const userAnswerInput = document.getElementById("user-answer");
+    const submitBtn = document.getElementById("submit-btn");
+    const recordBtn = document.getElementById("record-btn");
+    const preview = document.getElementById("preview");
+    const recordedVideoContainer = document.getElementById("recorded-video-container");
+    const startBtn = document.getElementById("start-btn");
+    const subjectSelect = document.getElementById("subject");
+
+    // Initialize speech recognition if supported
+    if ("webkitSpeechRecognition" in window) {
+      recognition = new webkitSpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        userAnswerInput.value = transcript;
+        submitAnswer();
+        toggleSpeechBtn(false);
+      };
+
+      recognition.onerror = (event) => {
+        alert("Speech recognition error: " + event.error);
+        toggleSpeechBtn(false);
+      };
+
+      recognition.onend = () => {
+        toggleSpeechBtn(false);
+      };
+    } else {
+      recordBtn.disabled = true;
+      recordBtn.title = "Speech Recognition not supported in this browser. Use Chrome.";
+    }
+
+    // Event listeners
+    startBtn.addEventListener("click", startPractice);
+    submitBtn.addEventListener("click", submitAnswer);
+    recordBtn.addEventListener("click", toggleRecording);
+
+    // Start Practice
+    function startPractice() {
+      selectedSubject = subjectSelect.value;
+      currentIndex = 0;
+      chatHistory.innerHTML = "";
+      recordedVideoContainer.innerHTML = "";
+      userAnswerInput.value = "";
+      userAnswerInput.disabled = false;
+      submitBtn.disabled = false;
+      recordBtn.disabled = false;
+      startBtn.disabled = true;
+      subjectSelect.disabled = true;
+      preview.srcObject = null;
+
+      if (stream) {
+        stopStream();
+      }
+
+      askQuestion();
+    }
+
+    // Display question + AI answer
+    function askQuestion() {
+      const list = questions[selectedSubject];
+      if (currentIndex >= list.length) {
+        finishPractice();
+        return;
+      }
+
+      currentQuestion = list[currentIndex];
+      currentIndex++;
+
+      chatHistory.innerHTML += `
+        <div class="chat-question"><strong>AI Question:</strong> ${currentQuestion.question}</div>
+        <div class="chat-ai-answer"><strong>Suggested Answer:</strong> ${currentQuestion.answers[0]}</div>
+      `;
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+
+      userAnswerInput.value = "";
+      userAnswerInput.focus();
+
+      // Stop previous recording if any
+      if (isRecording) {
+        stopRecording();
+      }
+    }
+
+    // Submit user's answer
+    function submitAnswer() {
+      const userText = userAnswerInput.value.trim();
+      if (!userText) {
+        alert("Please type or speak your answer before submitting.");
+        return;
+      }
+
+      chatHistory.innerHTML += `
+        <div class="chat-user"><strong>Your Answer:</strong> ${userText}</div>
+      `;
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+
+      userAnswerInput.value = "";
+      userAnswerInput.disabled = true;
+      submitBtn.disabled = true;
+      recordBtn.disabled = true;
+
+      stopRecording();
+
+      // Small delay before next question
+      setTimeout(() => {
+        userAnswerInput.disabled = false;
+        submitBtn.disabled = false;
+        recordBtn.disabled = false;
+        askQuestion();
+      }, 1500);
+    }
+
+    // Finish all questions
+    function finishPractice() {
+      chatHistory.innerHTML += `
+        <div class="chat-question" style="text-align:center; font-weight:bold; color:#555;">
+          🎉 You have completed all questions. Thank you for practicing!
+        </div>
+      `;
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+
+      userAnswerInput.disabled = true;
+      submitBtn.disabled = true;
+      recordBtn.disabled = true;
+      startBtn.disabled = false;
+      subjectSelect.disabled = false;
+
+      stopStream();
+    }
+
+    // Webcam Recording Functions
+    async function startStream() {
+      try {
+        if (!stream) {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          preview.srcObject = stream;
+        }
+      } catch (err) {
+        alert("Could not access webcam and mic: " + err.message);
+      }
+    }
+
+    function stopStream() {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+        stream = null;
+        preview.srcObject = null;
+      }
+    }
+
+    async function startRecording() {
+      await startStream();
+      if (!stream) {
+        return;
+      }
+
+      recordedChunks = [];
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) recordedChunks.push(event.data);
+      };
+      mediaRecorder.onstop = onRecordingStop;
+      mediaRecorder.start();
+      isRecording = true;
+      toggleRecordBtn(true);
+    }
+
+    function stopRecording() {
+      if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+        isRecording = false;
+        toggleRecordBtn(false);
+      }
+    }
+
+    // Called when recording stops
+    function onRecordingStop() {
+      const blob = new Blob(recordedChunks, { type: "video/webm" });
+      const url = URL.createObjectURL(blob);
+
+      recordedVideoContainer.innerHTML = `
+        <h4>Your Recorded Answer Video:</h4>
+        <video controls src="${url}"></video>
+        <a href="${url}" download="answer_recording.webm">Download Video</a>
+      `;
+    }
+
+    // Toggle record button style & text
+    function toggleRecordBtn(isRec) {
+      if (isRec) {
+        recordBtn.classList.add("recording");
+        recordBtn.textContent = "⏹ Stop";
+      } else {
+        recordBtn.classList.remove("recording");
+        recordBtn.textContent = "🎤 Speak";
+      }
+    }
+
+    // Toggle speech button UI
+    function toggleSpeechBtn(isRec) {
+      if (isRec) {
+        recordBtn.classList.add("recording");
+        recordBtn.textContent = "⏹ Stop";
+      } else {
+        recordBtn.classList.remove("recording");
+        recordBtn.textContent = "🎤 Speak";
+      }
+    }
+
+    // Handle speech recognition and video recording toggle
+    function toggleRecording() {
+      if (!recognition) {
+        alert("Speech Recognition not supported in this browser. Please use Chrome.");
+        return;
+      }
+
+      if (recordBtn.classList.contains("recording")) {
+        // Stop recognition and recording
+        recognition.stop();
+        stopRecording();
+        toggleSpeechBtn(false);
+      } else {
+        // Start recognition and recording
+        recognition.start();
+        startRecording();
+        toggleSpeechBtn(true);
+      }
+    }
+
+    // Automatically start webcam recording when user starts typing
+    userAnswerInput.addEventListener("focus", () => {
+      if (!isRecording) {
+        startRecording();
+      }
+    });
+
+    // Stop recording if user leaves input empty and unfocuses
+    userAnswerInput.addEventListener("blur", () => {
+      if (!userAnswerInput.value.trim() && isRecording) {
+        stopRecording();
+      }
+    });
+  </script>
+</body>
+</html>
