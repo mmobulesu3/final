@@ -2,38 +2,93 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>My Website</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeotekSoft Learning</title>
+
   <style>
     body {
-      font-family: Arial;
-      background: #f4f6f8;
+      font-family: "Poppins", Arial, sans-serif;
+      background: linear-gradient(to right, #eef2f3, #d9e4f5);
       text-align: center;
-      padding: 40px;
+      padding: 60px 20px;
+      margin: 0;
     }
+
+    /* Main Card */
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: white;
+      padding: 50px 30px;
+      border-radius: 18px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    h1 {
+      font-size: 2.3rem;
+      margin-bottom: 8px;
+      color: #222;
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    p {
+      font-size: 1.1rem;
+      color: #444;
+      margin-bottom: 25px;
+    }
+
+    /* Buttons */
     a {
       display: block;
       margin: 15px auto;
       padding: 15px;
-      width: 250px;
+      width: 85%;
       text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 500;
       background: #007bff;
       color: white;
-      border-radius: 6px;
+      border-radius: 10px;
+      transition: 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
     }
+
     a:hover {
       background: #0056b3;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 18px rgba(0, 86, 179, 0.4);
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 30px;
+      font-size: 0.9rem;
+      color: #888;
     }
   </style>
 </head>
+
 <body>
 
-  <h1>🌐 Welcome</h1>
-  <p>Select a page</p>
+  <div class="container">
+    <h1>📘 NeotekSoft Learning</h1>
+    <div class="subtitle">@ M. Obulesu</div>
 
-  <a href="interview.html">Interview Page</a>
-  <a href="classes.html">Classes Page</a>
-  <a href="marketing.html">Marketing Page</a>
+    <p>Select a page to continue 🚀</p>
+
+    <a href="interview.html">🎤 Interview Page</a>
+    <a href="classes.html">📚 Classes Page</a>
+    <a href="marketing.html">📢 Marketing Page</a>
+
+    <div class="footer">
+      © 2026 NeotekSoft Learning | Designed by Obulesu
+    </div>
+  </div>
 
 </body>
 </html>
-
