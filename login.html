@@ -3,70 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Request Access</title>
+  <title>Login / Request Access</title>
 
   <style>
     body {
-      font-family: Arial;
-      background: #f2f4f7;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
       text-align: center;
-      padding: 50px;
+      padding: 60px;
     }
 
-    .box {
+    .login-box {
       background: white;
-      padding: 30px;
-      width: 350px;
+      width: 380px;
       margin: auto;
-      border-radius: 12px;
-      box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0px 6px 15px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      color: #007bff;
     }
 
     input {
       width: 90%;
-      padding: 10px;
+      padding: 12px;
       margin: 10px 0;
-      border-radius: 8px;
-      border: 1px solid gray;
+      border-radius: 10px;
+      border: 1px solid #ccc;
     }
 
     button {
       width: 95%;
       padding: 12px;
       border: none;
-      background: #3498db;
+      background: #007bff;
       color: white;
       font-size: 16px;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
     }
 
     button:hover {
-      background: #217dbb;
+      background: #0056b3;
+    }
+
+    p {
+      margin-top: 15px;
+      font-size: 14px;
+      color: gray;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="box">
-    <h2>Request Access</h2>
-    <p>Enter your details to access our pages.</p>
+  <div class="login-box">
+    <h2>🔐 Request Access</h2>
+    <p>Please enter your details. Admin will approve you.</p>
 
+    <!-- Replace your email below -->
     <form action="https://formsubmit.co/obulesumadam832@gmail.com" method="POST">
 
       <input type="text" name="name" placeholder="Full Name" required>
 
       <input type="email" name="email" placeholder="Email Address" required>
 
-      <input type="text" name="purpose" placeholder="Reason for access" required>
+      <input type="text" name="purpose" placeholder="Reason for Access" required>
 
+      <!-- Redirect after submit -->
       <input type="hidden" name="_next" value="thankyou.html">
 
-      <button type="submit">Request Access</button>
+      <button type="submit">Send Request</button>
 
     </form>
 
+    <p>After approval, Admin will share the access link.</p>
   </div>
 
 </body>
