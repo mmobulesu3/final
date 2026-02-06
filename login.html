@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request Access</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #f2f4f7;
+      text-align: center;
+      padding: 50px;
+    }
+
+    .box {
+      background: white;
+      padding: 30px;
+      width: 350px;
+      margin: auto;
+      border-radius: 12px;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid gray;
+    }
+
+    button {
+      width: 95%;
+      padding: 12px;
+      border: none;
+      background: #3498db;
+      color: white;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #217dbb;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="box">
+    <h2>Request Access</h2>
+    <p>Enter your details to access our pages.</p>
+
+    <form action="https://formsubmit.co/YOUR_EMAIL@gmail.com" method="POST">
+
+      <input type="text" name="name" placeholder="Full Name" required>
+
+      <input type="email" name="email" placeholder="Email Address" required>
+
+      <input type="text" name="purpose" placeholder="Reason for access" required>
+
+      <input type="hidden" name="_next" value="thankyou.html">
+
+      <button type="submit">Request Access</button>
+
+    </form>
+
+  </div>
+
+</body>
+</html>
