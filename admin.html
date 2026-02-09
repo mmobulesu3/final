@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin Dashboard</title>
+  <title>Advanced Admin Panel</title>
+
   <style>
     body {
       font-family: Arial;
@@ -9,31 +10,49 @@
       padding: 40px;
       text-align: center;
     }
+
     .box {
       background: white;
       padding: 30px;
-      width: 420px;
+      width: 600px;
       margin: auto;
       border-radius: 12px;
       box-shadow: 0 6px 15px rgba(0,0,0,.2);
     }
-    input, button {
-      width: 90%;
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    .approve {
+      background: green;
+      color: white;
+    }
+
+    .logout {
+      background: red;
+      color: white;
+      float: right;
+    }
+
+    .userRow {
+      background: #f9f9f9;
       padding: 12px;
       margin: 10px 0;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      border-radius: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    button {
-      background: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    .links a {
-      display: block;
-      margin: 10px;
-      font-size: 16px;
+
+    .codeBox {
+      margin-top: 20px;
+      font-weight: bold;
+      color: green;
     }
   </style>
 </head>
@@ -41,48 +60,107 @@
 <body>
 
   <div class="box">
-    <h1>🛠 Admin Dashboard</h1>
-    <p>Approve users and share access after approval.</p>
 
-    <hr><br>
+    <button class="logout" onclick="logoutAdmin()">Logout</button>
 
-    <!-- APPROVE USER -->
-    <h3>✅ Approve User</h3>
-    <input type="email" id="email" placeholder="User Email">
-    <button onclick="approveUser()">Generate Access Code</button>
+    <h2>🛠 Advanced Admin Dashboard</h2>
+    <p>Approve users & generate access codes</p>
 
-    <p id="result" style="font-weight:bold;color:green;"></p>
+    <hr>
 
-    <hr><br>
+    <h3>📩 Pending Requests</h3>
+    <div id="requestList"></div>
 
-    <!-- ADMIN LINKS -->
-    <h3>🔗 Admin Pages</h3>
-    <div class="links">
-      <a href="classes.html">📘 Classes Page</a>
-      <a href="interview.html">💼 Interview Page</a>
-      <a href="marketing.html">📢 Marketing Page</a>
-    </div>
+    <hr>
+
+    <h3>✅ Approved Users</h3>
+    <div id="approvedList"></div>
+
+    <p class="codeBox" id="result"></p>
   </div>
 
   <script>
-    function approveUser() {
-      const email = document.getElementById("email").value;
-      if (!email) {
-        alert("Please enter user email");
-        return;
+    // ✅ Admin Protection
+    if (localStorage.getItem("adminLoggedIn") !== "true") {
+      alert("❌ Admin Login Required!");
+      window.location.href = "admin-login.html";
+    }
+
+    // Load Requests
+    let requests = JSON.parse(localStorage.getItem("requests") || "[]");
+    let approved = JSON.parse(localStorage.getItem("approved") || "[]");
+
+    function loadRequests() {
+      let html = "";
+
+      if (requests.length === 0) {
+        html = "<p>No pending requests 🚀</p>";
       }
 
-      const accessCode = "ACC-" + Math.floor(100000 + Math.random() * 900000);
+      requests.forEach((email, index) => {
+        html += `
+          <div class="userRow">
+            <span>👤 ${email}</span>
+            <button class="approve" onclick="approveUser(${index})">
+              Approve
+            </button>
+          </div>
+        `;
+      });
 
-      // Save access code (browser-based)
-      localStorage.setItem(email, accessCode);
+      document.getElementById("requestList").innerHTML = html;
+      loadApproved();
+    }
+
+    // Approve User
+    function approveUser(index) {
+
+      const email = requests[index];
+
+      // Generate Access Code
+      const code = "ACC-" + Math.floor(100000 + Math.random() * 900000);
+
+      // Save Code for User Login
+      localStorage.setItem(email, code);
+
+      // Move to Approved List
+      approved.push({ email: email, code: code });
+      localStorage.setItem("approved", JSON.stringify(approved));
+
+      // Remove from Requests
+      requests.splice(index, 1);
+      localStorage.setItem("requests", JSON.stringify(requests));
 
       document.getElementById("result").innerHTML =
-        "Access Approved ✅<br><br>" +
-        "Email: " + email + "<br>" +
-        "Access Code: <span style='font-size:20px'>" + accessCode + "</span><br><br>" +
-        "📧 Send this code to the user";
+        `✅ Approved: ${email}<br>Access Code: <b>${code}</b>`;
+
+      loadRequests();
     }
+
+    // Load Approved Users
+    function loadApproved() {
+      let html = "";
+
+      if (approved.length === 0) {
+        html = "<p>No approved users yet</p>";
+      }
+
+      approved.forEach(user => {
+        html += `<p>✅ ${user.email} → <b>${user.code}</b></p>`;
+      });
+
+      document.getElementById("approvedList").innerHTML = html;
+    }
+
+    // Logout Admin
+    function logoutAdmin() {
+      localStorage.removeItem("adminLoggedIn");
+      alert("Logged out!");
+      window.location.href = "admin-login.html";
+    }
+
+    // Run On Page Load
+    loadRequests();
   </script>
 
 </body>
