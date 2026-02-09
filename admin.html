@@ -2,15 +2,88 @@
 <html>
 <head>
   <title>Admin Dashboard</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #f4f7fb;
+      padding: 40px;
+      text-align: center;
+    }
+    .box {
+      background: white;
+      padding: 30px;
+      width: 420px;
+      margin: auto;
+      border-radius: 12px;
+      box-shadow: 0 6px 15px rgba(0,0,0,.2);
+    }
+    input, button {
+      width: 90%;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .links a {
+      display: block;
+      margin: 10px;
+      font-size: 16px;
+    }
+  </style>
 </head>
-<body style="font-family:Arial; text-align:center; padding:40px;">
 
-  <h1>Admin Dashboard</h1>
-  <p>Share these links only after approval.</p>
+<body>
 
-  <a href="classes.html">📘 Classes Page</a><br><br>
-  <a href="interview.html">💼 Interview Page</a><br><br>
-  <a href="marketing.html">📢 Marketing Page</a><br><br>
+  <div class="box">
+    <h1>🛠 Admin Dashboard</h1>
+    <p>Approve users and share access after approval.</p>
+
+    <hr><br>
+
+    <!-- APPROVE USER -->
+    <h3>✅ Approve User</h3>
+    <input type="email" id="email" placeholder="User Email">
+    <button onclick="approveUser()">Generate Access Code</button>
+
+    <p id="result" style="font-weight:bold;color:green;"></p>
+
+    <hr><br>
+
+    <!-- ADMIN LINKS -->
+    <h3>🔗 Admin Pages</h3>
+    <div class="links">
+      <a href="classes.html">📘 Classes Page</a>
+      <a href="interview.html">💼 Interview Page</a>
+      <a href="marketing.html">📢 Marketing Page</a>
+    </div>
+  </div>
+
+  <script>
+    function approveUser() {
+      const email = document.getElementById("email").value;
+      if (!email) {
+        alert("Please enter user email");
+        return;
+      }
+
+      const accessCode = "ACC-" + Math.floor(100000 + Math.random() * 900000);
+
+      // Save access code (browser-based)
+      localStorage.setItem(email, accessCode);
+
+      document.getElementById("result").innerHTML =
+        "Access Approved ✅<br><br>" +
+        "Email: " + email + "<br>" +
+        "Access Code: <span style='font-size:20px'>" + accessCode + "</span><br><br>" +
+        "📧 Send this code to the user";
+    }
+  </script>
 
 </body>
 </html>
