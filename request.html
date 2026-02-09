@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Request Access</title>
+  <style>
+    body { font-family: Arial; background: #f4f7fb; text-align: center; padding: 50px; }
+    .box { background: white; padding: 30px; width: 400px; margin: auto; border-radius: 12px; box-shadow: 0 6px 15px rgba(0,0,0,.2); }
+    input, button { width: 90%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; }
+    button { background: #28a745; color: white; border: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Request Access</h2>
+    <input type="email" id="email" placeholder="Your Email">
+    <button onclick="requestAccess()">Request Access</button>
+    <p id="msg" style="color:green;font-weight:bold;"></p>
+  </div>
+
+  <script>
+    function requestAccess() {
+      const email = document.getElementById('email').value;
+      if(!email) { alert("Enter your email"); return; }
+
+      // Save request in localStorage
+      let requests = JSON.parse(localStorage.getItem("requests") || "[]");
+      if(requests.includes(email)) {
+        document.getElementById("msg").innerText = "You already requested access!";
+        return;
+      }
+
+      requests.push(email);
+      localStorage.setItem("requests", JSON.stringify(requests));
+      document.getElementById("msg").innerText = "✅ Access request sent. Admin will approve soon!";
+      document.getElementById("email").value = '';
+    }
+  </script>
+</body>
+</html>
