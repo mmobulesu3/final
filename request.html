@@ -17,23 +17,31 @@
     <p id="msg" style="color:green;font-weight:bold;"></p>
   </div>
 
-  <script>
-    function requestAccess() {
-      const email = document.getElementById('obulesumadam832@gmail.com').value;
-      if(!email) { alert("Enter your email"); return; }
+<script>
+  function requestAccess() {
+    const email = document.getElementById('email').value;
 
-      // Save request in localStorage
-      let requests = JSON.parse(localStorage.getItem("requests") || "[]");
-      if(requests.includes(email)) {
-        document.getElementById("msg").innerText = "You already requested access!";
-        return;
-      }
-
-      requests.push(email);
-      localStorage.setItem("requests", JSON.stringify(requests));
-      document.getElementById("msg").innerText = "✅ Access request sent. Admin will approve soon!";
-      document.getElementById("email").value = '';
+    if(!email) {
+      alert("Enter your email");
+      return;
     }
-  </script>
+
+    // Save request in localStorage
+    let requests = JSON.parse(localStorage.getItem("requests") || "[]");
+
+    if(requests.includes(email)) {
+      document.getElementById("msg").innerText = "You already requested access!";
+      return;
+    }
+
+    requests.push(email);
+    localStorage.setItem("requests", JSON.stringify(requests));
+
+    document.getElementById("msg").innerText =
+      "✅ Access request sent. Admin will approve soon!";
+
+    document.getElementById("email").value = '';
+  }
+</script>
 </body>
 </html>
