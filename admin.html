@@ -14,14 +14,14 @@
     .box {
       background: white;
       padding: 30px;
-      width: 600px;
+      width: 700px;
       margin: auto;
       border-radius: 12px;
       box-shadow: 0 6px 15px rgba(0,0,0,.2);
     }
 
     button {
-      padding: 10px 15px;
+      padding: 8px 14px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
@@ -30,6 +30,11 @@
 
     .approve {
       background: green;
+      color: white;
+    }
+
+    .remove {
+      background: #dc3545;
       color: white;
     }
 
@@ -54,114 +59,157 @@
       font-weight: bold;
       color: green;
     }
+
+    .sectionTitle {
+      margin-top: 30px;
+    }
+
+    .stats {
+      background: #eef3ff;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 
 <body>
 
-  <div class="box">
+<div class="box">
 
-    <button class="logout" onclick="logoutAdmin()">Logout</button>
+  <button class="logout" onclick="logoutAdmin()">Logout</button>
 
-    <h2>🛠 Advanced Admin Dashboard</h2>
-    <p>Approve users & generate access codes</p>
+  <h2>🛠 Advanced Admin Dashboard</h2>
+  <p>Approve users & generate access codes</p>
 
-    <hr>
-
-    <h3>📩 Pending Requests</h3>
-    <div id="requestList"></div>
-
-    <hr>
-
-    <h3>✅ Approved Users</h3>
-    <div id="approvedList"></div>
-
-    <p class="codeBox" id="result"></p>
+  <div class="stats">
+    📩 Pending: <span id="pendingCount"></span> |
+    ✅ Approved: <span id="approvedCount"></span>
   </div>
 
-  <script>
-    // ✅ Admin Protection
-    if (localStorage.getItem("adminLoggedIn") !== "true") {
-      alert("❌ Admin Login Required!");
-      window.location.href = "admin-login.html";
-    }
+  <hr>
 
-    // Load Requests
-    let requests = JSON.parse(localStorage.getItem("requests") || "[]");
-    let approved = JSON.parse(localStorage.getItem("approved") || "[]");
+  <h3 class="sectionTitle">📩 Pending Requests</h3>
+  <div id="requestList"></div>
 
-    function loadRequests() {
-      let html = "";
+  <hr>
 
-      if (requests.length === 0) {
-        html = "<p>No pending requests 🚀</p>";
-      }
+  <h3 class="sectionTitle">✅ Approved Users</h3>
+  <div id="approvedList"></div>
 
-      requests.forEach((email, index) => {
-        html += `
-          <div class="userRow">
-            <span>👤 ${email}</span>
-            <button class="approve" onclick="approveUser(${index})">
-              Approve
-            </button>
-          </div>
-        `;
-      });
+  <p class="codeBox" id="result"></p>
 
-      document.getElementById("requestList").innerHTML = html;
-      loadApproved();
-    }
+</div>
 
-    // Approve User
-    function approveUser(index) {
+<script>
+  // 🔐 ADMIN PROTECTION
+  if (localStorage.getItem("adminLoggedIn") !== "true") {
+    alert("❌ Admin Login Required!");
+    window.location.href = "admin-login.html";
+  }
 
-      const email = requests[index];
+  // Load Data
+  let requests = JSON.parse(localStorage.getItem("requests") || "[]");
+  let approvedUsers = JSON.parse(localStorage.getItem("approvedUsers") || "{}");
 
-      // Generate Access Code
-      const code = "ACC-" + Math.floor(100000 + Math.random() * 900000);
-
-      // Save Code for User Login
-      localStorage.setItem(email, code);
-
-      // Move to Approved List
-      approved.push({ email: email, code: code });
-      localStorage.setItem("approved", JSON.stringify(approved));
-
-      // Remove from Requests
-      requests.splice(index, 1);
-      localStorage.setItem("requests", JSON.stringify(requests));
-
-      document.getElementById("result").innerHTML =
-        `✅ Approved: ${email}<br>Access Code: <b>${code}</b>`;
-
-      loadRequests();
-    }
-
-    // Load Approved Users
-    function loadApproved() {
-      let html = "";
-
-      if (approved.length === 0) {
-        html = "<p>No approved users yet</p>";
-      }
-
-      approved.forEach(user => {
-        html += `<p>✅ ${user.email} → <b>${user.code}</b></p>`;
-      });
-
-      document.getElementById("approvedList").innerHTML = html;
-    }
-
-    // Logout Admin
-    function logoutAdmin() {
-      localStorage.removeItem("adminLoggedIn");
-      alert("Logged out!");
-      window.location.href = "admin-login.html";
-    }
-
-    // Run On Page Load
+  // Load Everything
+  function loadAll() {
     loadRequests();
-  </script>
+    loadApproved();
+    updateStats();
+  }
+
+  // 📩 Load Pending Requests
+  function loadRequests() {
+    let html = "";
+
+    if (requests.length === 0) {
+      html = "<p>No pending requests 🚀</p>";
+    }
+
+    requests.forEach((email, index) => {
+      html += `
+        <div class="userRow">
+          <span>👤 ${email}</span>
+          <button class="approve" onclick="approveUser(${index})">
+            Approve
+          </button>
+        </div>
+      `;
+    });
+
+    document.getElementById("requestList").innerHTML = html;
+  }
+
+  // ✅ Approve User
+  function approveUser(index) {
+
+    const email = requests[index];
+
+    const code = "ACC-" + Math.floor(100000 + Math.random() * 900000);
+
+    approvedUsers[email] = code;
+    localStorage.setItem("approvedUsers", JSON.stringify(approvedUsers));
+
+    requests.splice(index, 1);
+    localStorage.setItem("requests", JSON.stringify(requests));
+
+    document.getElementById("result").innerHTML =
+      `✅ Approved: ${email}<br>Access Code: <b>${code}</b>`;
+
+    loadAll();
+  }
+
+  // ✅ Load Approved Users
+  function loadApproved() {
+    let html = "";
+    const users = Object.keys(approvedUsers);
+
+    if (users.length === 0) {
+      html = "<p>No approved users yet</p>";
+    }
+
+    users.forEach(email => {
+      html += `
+        <div class="userRow">
+          <span>✅ ${email} → <b>${approvedUsers[email]}</b></span>
+          <button class="remove" onclick="removeUser('${email}')">
+            Remove
+          </button>
+        </div>
+      `;
+    });
+
+    document.getElementById("approvedList").innerHTML = html;
+  }
+
+  // ❌ Remove Approved User
+  function removeUser(email) {
+    if (!confirm("Remove this user?")) return;
+
+    delete approvedUsers[email];
+    localStorage.setItem("approvedUsers", JSON.stringify(approvedUsers));
+
+    loadAll();
+  }
+
+  // 📊 Update Stats
+  function updateStats() {
+    document.getElementById("pendingCount").innerText = requests.length;
+    document.getElementById("approvedCount").innerText =
+      Object.keys(approvedUsers).length;
+  }
+
+  // 🔓 Logout Admin
+  function logoutAdmin() {
+    localStorage.removeItem("adminLoggedIn");
+    alert("Logged out!");
+    window.location.href = "admin-login.html";
+  }
+
+  // 🚀 Initialize
+  loadAll();
+</script>
 
 </body>
 </html>
